@@ -1,0 +1,37 @@
+{
+  "name": "vuex-storage-share",
+  "version": "0.0.1",
+  "description": "Vuex storage share plugin.",
+  "main": "dist/vuex-storage-share.common.js",
+  "unpkg": "dist/vuex-storage-share.umd.min.js",
+  "jsdelivr": "dist/vuex-storage-share.umd.min.js",
+  "files": [
+    "src",
+    "dist/*.js"
+  ],
+  "scripts": {
+    "build": "vue-cli-service build --target lib --name vuex-storage-share src/vuex-storage-share.js",
+    "prepare": "npm run build",
+    "release": "release-it"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mlinquan/vuex-storage-share.git"
+  },
+  "keywords": [
+    "vuex",
+    "storage",
+    "share",
+    "tab",
+    "localStorage"
+  ],
+  "author": "LinQuan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mlinquan/vuex-storage-share/issues"
+  },
+  "homepage": "https://github.com/mlinquan/vuex-storage-share#readme",
+  "devDependencies": {
+    "@vue/cli-service": "^4.2.3"
+  }
+}
