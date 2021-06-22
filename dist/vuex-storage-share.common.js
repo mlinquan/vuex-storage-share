@@ -237,6 +237,7 @@ const StoragePlugin = function(options) {
   this.initStatus = false
   this.storagePrefix = options.storagePrefix
   this.expires_in = options.expires_in
+  this.uniqueId = `${Date.now()}-${Math.random()}`
 
   if (Array.isArray(options.predicate)) {
     const predicate = options.predicate
@@ -255,29 +256,53 @@ const StoragePlugin = function(options) {
   this.subscriber = store => {
     if(!this.initStatus) {
       const storageHandler = (e) => {
+        console.log('e.key', e.key)
         if (!e.key || !this.initStatus || e.key.indexOf(this.storagePrefix) !== 0) {
           return
         }
 
-        const type = e.key.substring(this.storagePrefix.length)
-        let payload = e.newValue
+        let newValue = e.newValue
+        let oldValue = e.oldValue
+        let type = null
+        let payload = null
+
         try {
-          payload = JSON.parse(e.newValue)
+          oldValue = JSON.parse(oldValue)
         } catch (e) {
-          console.log(e)
+          // console.log(e)
+        }
+
+        try {
+          newValue = JSON.parse(newValue)
+          payload = newValue.payload
+        } catch (e) {
+          // console.log(e)
+        }
+
+        const uniqueId = (oldValue && oldValue.uniqueId) || (newValue && newValue.uniqueId)
+
+        if(uniqueId === this.uniqueId) {
+          return
+        }
+
+        type = (oldValue && oldValue.type) || (newValue && newValue.type)
+
+        if (!type) {
+          return
         }
 
         if (typeof options.storageListener === 'function') {
-          options.storageListener.call(null, {
+          options.storageListener.call(this, {
             type,
             payload
           })
         }
-
-        store.commit(type, payload)
-
+        try {
+          store.commit(type, payload)
+        } catch (e) {
+          // console.log(e)
+        }
       }
-
 
       window.addEventListener('storage', storageHandler, false)
     }
@@ -292,10 +317,11 @@ const StoragePlugin = function(options) {
       })) {
         return
       }
+      const mutation = this.get(key)
       try {
-        store.commit(key, this.get(key))
+        store.commit(mutation.type, mutation.payload)
       } catch (e) {
-        console.log(e)
+        // console.log(e)
       }
     })
     this.initStatus = true
@@ -311,13 +337,17 @@ const StoragePlugin = function(options) {
 }
 
 StoragePlugin.prototype.set = function(key, data) {
-  key = this.storagePrefix + key
+  const storeKey = this.storagePrefix + key
   try {
-    data = JSON.stringify(data)
+    data = JSON.stringify({
+      type: key,
+      payload: data,
+      uniqueId: this.uniqueId
+    })
   } catch (e) {
-    console.log(e)
+    // console.log(e)
   }
-  window.localStorage.setItem(key, data)
+  window.localStorage.setItem(storeKey, data)
 }
 
 StoragePlugin.prototype.get = function(key) {
@@ -326,7 +356,7 @@ StoragePlugin.prototype.get = function(key) {
   try {
     data = JSON.parse(data)
   } catch (e) {
-    console.log(e)
+    // console.log(e)
   }
   return data
 }
@@ -336,7 +366,7 @@ StoragePlugin.prototype.remove = function(key) {
   try {
     window.localStorage.removeItem(key)
   } catch (e) {
-    console.log(e)
+    // console.log(e)
   }
 }
 
