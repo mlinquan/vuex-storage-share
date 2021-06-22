@@ -47,39 +47,32 @@ const StoragePlugin = function(options) {
     }
   }
 
+  let in_progress = false
+
   this.subscriber = store => {
     if(!this.initStatus) {
       const storageHandler = (e) => {
-        console.log('e.key', e.key)
         if (!e.key || !this.initStatus || e.key.indexOf(this.storagePrefix) !== 0) {
           return
         }
 
         let newValue = e.newValue
-        let oldValue = e.oldValue
         let type = null
         let payload = null
 
         try {
-          oldValue = JSON.parse(oldValue)
-        } catch (e) {
-          // console.log(e)
-        }
-
-        try {
           newValue = JSON.parse(newValue)
           payload = newValue.payload
+          type = newValue.type
         } catch (e) {
           // console.log(e)
         }
 
-        const uniqueId = (oldValue && oldValue.uniqueId) || (newValue && newValue.uniqueId)
+        const uniqueId = newValue && newValue.uniqueId
 
         if(uniqueId === this.uniqueId) {
           return
         }
-
-        type = (oldValue && oldValue.type) || (newValue && newValue.type)
 
         if (!type) {
           return
@@ -92,9 +85,10 @@ const StoragePlugin = function(options) {
           })
         }
         try {
+          in_progress = true
           store.commit(type, payload)
-        } catch (e) {
-          // console.log(e)
+        } finally {
+          in_progress = false
         }
       }
 
@@ -123,6 +117,9 @@ const StoragePlugin = function(options) {
     store.subscribe((mutation, state) => {
       // 每次 mutation 之后调用
       // mutation 的格式为 { type, payload }
+      if(in_progress) {
+        return
+      }
       if (options.predicate(mutation, state)) {
         this.set(mutation.type, mutation.payload)
       }
