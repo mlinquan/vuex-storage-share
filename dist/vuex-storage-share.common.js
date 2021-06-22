@@ -252,30 +252,35 @@ const StoragePlugin = function(options) {
     }
   }
 
-  const storageHandler = (e) => {
-    if (!e.key || !this.initStatus || e.key.indexOf(this.storagePrefix) !== 0) {
-      return
-    }
-
-    const type = e.key.substring(this.storagePrefix.length)
-    let payload = e.newValue
-    try {
-      payload = JSON.parse(e.newValue)
-    } catch (e) {
-      console.log(e)
-    }
-
-    if (typeof options.storageListener === 'function') {
-      options.storageListener.call(null, {
-        type,
-        payload
-      })
-    }
-  }
-
-  window.addEventListener('storage', storageHandler, false)
-
   this.subscriber = store => {
+    if(!this.initStatus) {
+      const storageHandler = (e) => {
+        if (!e.key || !this.initStatus || e.key.indexOf(this.storagePrefix) !== 0) {
+          return
+        }
+
+        const type = e.key.substring(this.storagePrefix.length)
+        let payload = e.newValue
+        try {
+          payload = JSON.parse(e.newValue)
+        } catch (e) {
+          console.log(e)
+        }
+
+        if (typeof options.storageListener === 'function') {
+          options.storageListener.call(null, {
+            type,
+            payload
+          })
+        }
+
+        store.commit(type, payload)
+
+      }
+
+
+      window.addEventListener('storage', storageHandler, false)
+    }
     // 从 localStorage 获取 state 进行初始化
     Object.keys(window.localStorage).forEach(key => {
       if (key.indexOf(this.storagePrefix) !== 0) {
