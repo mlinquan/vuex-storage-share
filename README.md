@@ -23,7 +23,7 @@ import VuexStorageShare from 'vuex-storage-share'
 const storagePlugin = VuexStorageShare({
   storagePrefix: 'VUEX_STORAGE/',
   predicate: ['SET_USER_INFO', 'SET_TOKEN', 'SET_USER_AVATAR'],
-  expires_in: 360, // one hour
+  expires_in: 3600, // One hour, it has not yet been realized
   storageListener({ type, payload }) {
     const route = router.app._route
     if (type === 'SET_USER_INFO') {

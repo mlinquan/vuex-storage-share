@@ -1,6 +1,6 @@
 {
   "name": "vuex-storage-share",
-  "version": "0.0.1",
+  "version": "0.1.2",
   "description": "Vuex storage share plugin.",
   "main": "dist/vuex-storage-share.common.js",
   "unpkg": "dist/vuex-storage-share.umd.min.js",

@@ -218,8 +218,7 @@ const vuexStorageShare = function(storagePrefix, options) {
   }
   options = Object.assign(
     {
-      // cache_time: 24
-      expires_in: 360,
+      expires_in: 3600,
       storagePrefix: 'VUEX_STORAGE/',
       predicate: () => {
         return true
@@ -258,6 +257,7 @@ const StoragePlugin = function(options) {
   this.subscriber = store => {
     if(!this.initStatus) {
       const storageHandler = (e) => {
+        console.log(e)
         if (!e.key || !this.initStatus || e.key.indexOf(this.storagePrefix) !== 0) {
           return
         }
